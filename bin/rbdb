@@ -3,4 +3,4 @@ $: << File.expand_path(File.dirname(__FILE__) + "/../lib")
 
 require 'rbdb'
 
-RBDB::Shell.new
+RBDB::Client::Shell.new

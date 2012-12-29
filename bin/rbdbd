@@ -2,4 +2,4 @@
 $: << File.expand_path(File.dirname(__FILE__) + "/../lib")
 
 require 'rbdb'
-RBDB::Server.new
+RBDB::DB::Server.new
