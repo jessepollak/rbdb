@@ -28,7 +28,7 @@ module RBDB
                 docs.each do |doc|
                     puts doc
                     d = Document.new(doc, @file)
-                    @indexes[:_id].insert(d)
+                    # @indexes[:_id].insert(d)
                 end
             end
 
@@ -40,7 +40,7 @@ module RBDB
                 docs = []
                 opts = {}
 
-                keys, opts[:index] = sort_query_keys(query)
+                keys, opts[:index] = query.keys, false
                 opts[:loaded] = false
 
                 keys.each do |key|
@@ -105,9 +105,10 @@ module RBDB
             end
 
             def load_indexes
-                @indexes = {
-                    _id: Index.new(:_id)
-                }
+                @indexes = {}
+                # @indexes = {
+                #     _id: Index.new(:_id)
+                # }
             end
 
             def to_s
