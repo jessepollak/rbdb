@@ -1,4 +1,5 @@
-# RBDB
+RBDB
+========
 
 A MongoDB 'clone' (read: 1/10000 of the functionality) written in Ruby to learn more about databases and ruby.
 
