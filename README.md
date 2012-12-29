@@ -35,7 +35,7 @@ Hooray!
 
 # TODO
 
-- persist indexes
+- add indexes
 - add DELETE functionality
 - switch to flush writing every 60 seconds
 
