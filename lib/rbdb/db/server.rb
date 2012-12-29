@@ -26,7 +26,7 @@ module RBDB
 
                     response = @db.process(request)
 
-                    client.puts response
+                    client.puts response.to_json
                     client.close
                 end
             end

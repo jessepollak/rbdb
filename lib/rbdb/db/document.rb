@@ -9,13 +9,17 @@ module RBDB
             }
 
             def initialize(doc, file)
-                unless @id = doc['_id']
+                unless doc[:_id]
                     @id = Time.now.to_i.to_s(16) + Random.rand(OPTIONS[:max_random]).to_s(16)
-                    doc['_id'] = @id
+                    doc[:_id] = @id
+                else
+                    @id = doc[:_id]
                 end
 
                 bson = BSON.serialize(doc).to_s
                 @length = bson.length
+
+                file.seek(0, IO::SEEK_END)
 
                 file.write([@length].pack('I'))
                 @start = file.pos

@@ -9,9 +9,9 @@ module RBDB
             }
 
             OP_CODES = {
-                1 => :insert,
-                2 => :delete,
-                3 => :query,
+                0 => :insert,
+                1 => :delete,
+                2 => :query,
                 100 => :handshake
             }
 
@@ -27,9 +27,9 @@ module RBDB
             end
 
             def process(request)
-                request = JSON.parse(request)
+                request = JSON.parse(request, symbolize_names: true)
 
-                self.send(OP_CODES[request['headers']['op_code']], request)
+                self.send(OP_CODES[request[:headers][:op_code]], request)
             end
 
             def load_collections
@@ -48,21 +48,22 @@ module RBDB
             end
 
             def insert(request)
-                coll = find_or_create_collection(request['headers']['collection'])
+                coll = find_or_create_collection(request[:headers][:collection])
                 coll.insert(request)
             end
 
             def delete(request)
-                raise NoCollectionError unless coll = @collections[request['headers']['collection']]
+                raise NoCollectionError unless coll = @collections[request[:headers][:collection]]
                 puts "DELETE: #{request}"
             end
 
             def query(request)
-                raise NoCollectionError unless coll = @collections[request['headers']['collection']]
+                raise NoCollectionError unless coll = @collections[request[:headers][:collection]]
                 coll.query(request)
             end
 
             def handshake(request)
+                @collections.keys
             end
 
             def find_or_create_collection(name)

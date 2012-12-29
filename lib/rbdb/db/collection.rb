@@ -24,10 +24,11 @@ module RBDB
             end
 
             def insert(request)
-                docs = request['body']['documents']
+                docs = request[:body][:documents]
                 docs.each do |doc|
+                    puts doc
                     d = Document.new(doc, @file)
-                    @indexes['_id'].insert(d)
+                    @indexes[:_id].insert(d)
                 end
             end
 
@@ -35,7 +36,7 @@ module RBDB
             end
 
             def query(request)
-                query = request['body']['query']
+                query = request[:body][:query]
                 docs = []
                 opts = {}
 
@@ -51,17 +52,17 @@ module RBDB
 
             def sort_query_keys(query)
                 keys = query.keys
-                id = !query['_id'].nil?
+                id = !query[:_id].nil?
                 index = false
 
                 query.keys.each do |k|
-                    if k != '_id' && @indexes[k]
+                    if k != :_id && @indexes[k]
                         keys.remove(k)
                         keys.unshift(k)
                         index = true
                     end
                 end
-                keys.unshift('_id') if id
+                keys.unshift(:_id) if id
 
                 [keys, index || id]
             end
@@ -89,7 +90,7 @@ module RBDB
                 while !@file.eof?
                     length = @file.read(4).unpack('I')[0]
                     d = BSON.deserialize(@file.read(length))
-                    docs << d if d[key] == query[key]
+                    docs << d if d[key.to_s] == query[key]
                 end
                 docs
             end
@@ -105,7 +106,7 @@ module RBDB
 
             def load_indexes
                 @indexes = {
-                    '_id' => Index.new(:_id)
+                    _id: Index.new(:_id)
                 }
             end
 

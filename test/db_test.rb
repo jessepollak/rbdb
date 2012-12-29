@@ -9,7 +9,7 @@ db = RBDB::DB::DB.new
 
 insert_request = {
     headers: {
-        op_code: 1,
+        op_code: 0,
         request_id: 1,
         collection: 'test'
     },
@@ -37,7 +37,7 @@ insert_request = {
 
 query_request = {
     headers: {
-        op_code: 3,
+        op_code: 2,
         request_id: 2,
         collection: 'test'
     },
@@ -54,5 +54,5 @@ begin
     db.process(insert_request)
     puts db.process(query_request)
 ensure
-    FileUtils.rm_rf('data')
+    # FileUtils.rm_rf('data')
 end

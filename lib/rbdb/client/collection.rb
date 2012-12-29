@@ -1,8 +1,8 @@
-require 'json'
+require 'bson'
 
 module RBDB
     module Client
-        class Client
+        class Collection
 
             OPTIONS = {
                 binding: TOPLEVEL_BINDING,
@@ -14,25 +14,19 @@ module RBDB
                 insert: 0,
                 delete: 1,
                 query: 2,
-                handshake: 100
+                handshake: 1000
             }
 
             def initialize
                 @binding = binding()
                 @data = Array.new
                 @id = 1
-                @collection = nil
-                @collections = []
-
-                handshake
             end
 
             def insert(obj, collection=@collection)
-                @collection = nil
-
-                obj = validate(obj, array: true)
+                validate(obj)
                 setup_connection
-                headers = generate_headers(__method__, collection)
+                headers = generate_headers(__method__)
                 body = {
                     documents: obj
                 }
@@ -40,19 +34,15 @@ module RBDB
             end
 
             def delete(obj, collection=@collection)
-                @collection = nil
-
                 validate(obj)
                 setup_connection
-                headers = generate_headers(__method__, collection)
+                headers = generate_headers(__method__)
             end
 
             def query(obj, collection=@collection)
-                @collection = nil
-
                 validate(obj)
                 setup_connection
-                headers = generate_headers(__method__, collection)
+                headers = generate_headers(__method__)
                 body = {
                     query: obj
                 }
@@ -63,19 +53,12 @@ module RBDB
                 setup_connection
                 headers = generate_headers(__method__)
                 body = {}
-
-                response = JSON.parse(send(body, headers))
-
-                @collections = response
+                send(body, headers)
             end
 
             def method_missing(method, *args, &block)
-                if @collections.member? method.to_s
-                    @collection = method
-                    self
-                else
-                    super
-                end
+                puts method
+                self
             end
 
             private
@@ -90,29 +73,22 @@ module RBDB
                     end
                 end
 
-                def validate(obj, opts = {})
-                    if opts[:array]
-                        obj = (obj.is_a? Array) ? obj : [obj]
-
-                        obj.each do |o|
-                            raise BadTypeError unless o.is_a? Hash
-                        end
-                    else
-                        raise BadTypeError unless obj.is_a? Hash
+                def validate(obj)
+                    obj = obj.is_a Array ? obj : [obj]
+                    obj.each do |o|
+                        raise BadTypeError unless o.is_a? Hash
                     end
-                    obj
                 end
 
-                def generate_headers(method, collection=nil)
+                def generate_headers(method)
                     {
                         request_id: @id +=1,
-                        op_code: OP_CODES[method],
-                        collection: collection
+                        op_code: OP_CODES[method]
                     }
                 end
 
                 def send(body, headers)
-                    request = {body: body, headers: headers}.to_json
+                    request = BSON.serialize({body: body, headers: headers})
                     @connection.puts(request)
                     @connection.read
                 end
